@@ -173,18 +173,62 @@ class NDVI_frame ( wx.Frame ):
 		self.m_staticText26.Wrap( -1 )
 		bSizer13.Add( self.m_staticText26, 0, wx.ALL, 5 )
 		
-		bSizer91 = wx.BoxSizer( wx.HORIZONTAL )
+		# bSizer91 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.date_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Date Acquired:", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.date_txt.Wrap( -1 )
-		bSizer91.Add( self.date_txt, 0, wx.ALL, 5 )
+		# self.date_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Date Acquired:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		# self.date_txt.Wrap( -1 )
+		# bSizer91.Add( self.date_txt, 0, wx.ALL, 5 )
 		
-		self.date_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.date_static_txt.Wrap( -1 )
-		bSizer91.Add( self.date_static_txt, 0, wx.ALL, 5 )
+		# self.date_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		# self.date_static_txt.Wrap( -1 )
+		# bSizer91.Add( self.date_static_txt, 0, wx.ALL, 5 )
+
+		bSizer92 = wx.BoxSizer( wx.HORIZONTAL )
+
+		self.upleft_lat_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Upper Left Latitude:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.upleft_lat_txt.Wrap( -1 )
+		bSizer92.Add( self.upleft_lat_txt, 0, wx.ALL, 5 )
 		
+		self.upleft_lat_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.upleft_lat_static_txt.Wrap( -1 )
+		bSizer92.Add( self.upleft_lat_static_txt, 0, wx.ALL, 5 )
+
+		bSizer93 = wx.BoxSizer( wx.HORIZONTAL )
+
+		self.upleft_lon_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Upper Left Longitude:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.upleft_lon_txt.Wrap( -1 )
+		bSizer93.Add( self.upleft_lon_txt, 0, wx.ALL, 5 )
 		
-		bSizer13.Add( bSizer91, 1, wx.EXPAND, 5 )
+		self.upleft_lon_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.upleft_lon_static_txt.Wrap( -1 )
+		bSizer93.Add( self.upleft_lon_static_txt, 0, wx.ALL, 5 )
+
+		bSizer94 = wx.BoxSizer( wx.HORIZONTAL )
+
+		self.lowright_lat_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Lower Right Latitude:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.lowright_lat_txt.Wrap( -1 )
+		bSizer94.Add( self.lowright_lat_txt, 0, wx.ALL, 5 )
+		
+		self.lowright_lat_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.lowright_lat_static_txt.Wrap( -1 )
+		bSizer94.Add( self.lowright_lat_static_txt, 0, wx.ALL, 5 )
+
+		bSizer95 = wx.BoxSizer( wx.HORIZONTAL )
+
+		self.lowright_lon_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Lower Right Longitude:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.lowright_lon_txt.Wrap( -1 )
+		bSizer95.Add( self.lowright_lon_txt, 0, wx.ALL, 5 )
+		
+		self.lowright_lon_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.lowright_lon_static_txt.Wrap( -1 )
+		bSizer95.Add( self.lowright_lon_static_txt, 0, wx.ALL, 5 )
+			
+		
+		# bSizer13.Add( bSizer91, 1, wx.EXPAND, 5 )
+		bSizer13.Add( bSizer92, 1, wx.EXPAND, 5 )
+		bSizer13.Add( bSizer93, 1, wx.EXPAND, 5 )
+		bSizer13.Add( bSizer94, 1, wx.EXPAND, 5 )
+		bSizer13.Add( bSizer95, 1, wx.EXPAND, 5 )
 		
 		
 		sbSizer_metadata.Add( bSizer13, 1, wx.EXPAND, 5 )
@@ -331,7 +375,11 @@ class NDVI_frame ( wx.Frame ):
 	def browseMetadata( self, event ):
 		path = self.metadata_btn.GetPath()
 		self.metadata = self.ndvi.ReadMetadata(path)
-		self.date_static_txt.SetLabel(str(self.metadata['DATE_ACQUIRED']))
+		# self.date_static_txt.SetLabel(str(self.metadata['DATE_ACQUIRED']))
+		self.upleft_lat_static_txt.SetLabel(str(self.metadata['CORNER_UL_LAT_PRODUCT']))
+		self.upleft_lon_static_txt.SetLabel(str(self.metadata['CORNER_UL_LON_PRODUCT']))
+		self.lowright_lat_static_txt.SetLabel(str(self.metadata['CORNER_LR_LAT_PRODUCT']))
+		self.lowright_lon_static_txt.SetLabel(str(self.metadata['CORNER_LR_LON_PRODUCT']))
 		event.Skip()
 	
 	def startNDVI( self, event ):
