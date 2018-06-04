@@ -39,16 +39,29 @@ class NDVI:
         self.ds_B5 = gdal.Open(path, GA_ReadOnly)
         self.isCropped = False
 
-    def SetCropCoordinate(self, lonStart, lonEnd, latStart, latEnd):
-        self.lonStartCrop = lonStart
-        self.lonEndCrop = lonEnd
+    def ReadMetadata(self, Meta):
+        file = open(Meta, 'r')
+        output = {}
+        for line in file.readlines():
+            if "=" in line:
+                l = line.split("=")
+                output[l[0].strip()] = l[1].strip()
+
+        if not len(output) > 0:
+            output = None
+
+        return output 
+
+    def SetCropCoordinate(self, latStart, latEnd, lonStart, lonEnd):
         self.latStartCrop = latStart
         self.latEndCrop = latEnd
+        self.lonStartCrop = lonStart
+        self.lonEndCrop = lonEnd
 
-        print ("lonStart: ", self.lonStartCrop)
-        print ("lonEnd: ", self.lonEndCrop)
         print ("latStart: ", self.latStartCrop)
         print ("latEnd: ", self.latEndCrop)
+        print ("lonStart: ", self.lonStartCrop)
+        print ("lonEnd: ", self.lonEndCrop)
 
     def CropImage(self):
         self.cols = self.ds_B4.RasterXSize
