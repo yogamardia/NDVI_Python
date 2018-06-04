@@ -9,6 +9,7 @@
 
 import wx
 import wx.xrc
+
 from ndvi import NDVI
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -165,11 +166,25 @@ class NDVI_frame ( wx.Frame ):
 		
 		bSizer13 = wx.BoxSizer( wx.VERTICAL )
 		
-		self.metadataPath_textCtrl = wx.TextCtrl( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer13.Add( self.metadataPath_textCtrl, 0, wx.ALL|wx.EXPAND, 5 )
+		self.metadata_btn = wx.FilePickerCtrl( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, u"Select Metadata", u"Text files (*.txt)|*.txt", wx.DefaultPosition, wx.Size( 300,-1 ), wx.FLP_DEFAULT_STYLE )
+		bSizer13.Add( self.metadata_btn, 0, wx.ALL, 5 )
 		
-		self.metadata_btn = wx.Button( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Browse Metadata", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer13.Add( self.metadata_btn, 0, wx.ALL|wx.EXPAND, 5 )
+		self.m_staticText26 = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText26.Wrap( -1 )
+		bSizer13.Add( self.m_staticText26, 0, wx.ALL, 5 )
+		
+		bSizer91 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.date_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Date Acquired:", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.date_txt.Wrap( -1 )
+		bSizer91.Add( self.date_txt, 0, wx.ALL, 5 )
+		
+		self.date_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.date_static_txt.Wrap( -1 )
+		bSizer91.Add( self.date_static_txt, 0, wx.ALL, 5 )
+		
+		
+		bSizer13.Add( bSizer91, 1, wx.EXPAND, 5 )
 		
 		
 		sbSizer_metadata.Add( bSizer13, 1, wx.EXPAND, 5 )
@@ -242,13 +257,13 @@ class NDVI_frame ( wx.Frame ):
 		self.browse_btn.Bind( wx.EVT_BUTTON, self.browseImage )
 		self.crop_btn.Bind( wx.EVT_BUTTON, self.cropCoordinate )
 		self.browse_nir_btn.Bind( wx.EVT_BUTTON, self.browseNIR )
-		self.metadata_btn.Bind( wx.EVT_BUTTON, self.browseMetadata )
+		self.metadata_btn.Bind( wx.EVT_FILEPICKER_CHANGED, self.browseMetadata )
 		self.ndvi_btn.Bind( wx.EVT_BUTTON, self.startNDVI )
 		self.save_btn.Bind( wx.EVT_BUTTON, self.saveImage )
 
 		self.ndvi = NDVI()
 		self.ndvi.SetOnProcessFinishListener(self)
-
+	
 	def __del__( self ):
 		pass
 	
@@ -279,12 +294,44 @@ class NDVI_frame ( wx.Frame ):
 		event.Skip()
 	
 	def cropCoordinate( self, event ):
+		latStart = self.startlat_txtCtrl.GetValue()
+		latEnd =  self.endlat_txtCtrl	.GetValue()
+		lonStart =  self.startlon_txtCtrl.GetValue()
+		lonEnd = self.endlon_txtCtrl.GetValue()
+
+		self.ndvi.SetCropCoordinate(latStart, latEnd, lonStart, lonEnd)
+		self.ndvi.CropImage()
 		event.Skip()
 	
+	def onCropFinish(self, red, nir):
+		red_image = self.convertToImage(red, False)
+		nir_image = self.convertToImage(nir, False)
+
+		self.img_red_bitmap.SetBitmap(wx.Bitmap(red_image))
+		self.nir_bitmap.SetBitmap(wx.Bitmap(nir_image))
+		frame.Layout()
+
 	def browseNIR( self, event ):
+		wildcard = "TIFF files (*.tif)|*.tif"
+		dialog = wx.FileDialog(None, "Choose a file",
+								wildcard=wildcard,
+								style=wx.FD_OPEN)
+		if dialog.ShowModal() == wx.ID_CANCEL:
+			return     
+		
+		path = dialog.GetPath()
+		self.ndvi.OpenB5File(path)
+		bitmap = wx.Bitmap(path, wx.BITMAP_TYPE_TIF)
+		image = wx.Bitmap.ConvertToImage(bitmap)
+		scaledImage = image.Scale(200, 200, wx.IMAGE_QUALITY_HIGH)
+		bitmap = wx.Bitmap(scaledImage)
+		self.nir_bitmap.SetBitmap(bitmap)
 		event.Skip()
 	
 	def browseMetadata( self, event ):
+		path = self.metadata_btn.GetPath()
+		self.metadata = self.ndvi.ReadMetadata(path)
+		self.date_static_txt.SetLabel(str(self.metadata['DATE_ACQUIRED']))
 		event.Skip()
 	
 	def startNDVI( self, event ):
