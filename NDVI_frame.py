@@ -172,16 +172,6 @@ class NDVI_frame ( wx.Frame ):
 		self.m_staticText26 = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText26.Wrap( -1 )
 		bSizer13.Add( self.m_staticText26, 0, wx.ALL, 5 )
-		
-		# bSizer91 = wx.BoxSizer( wx.HORIZONTAL )
-		
-		# self.date_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, u"Date Acquired:", wx.DefaultPosition, wx.DefaultSize, 0 )
-		# self.date_txt.Wrap( -1 )
-		# bSizer91.Add( self.date_txt, 0, wx.ALL, 5 )
-		
-		# self.date_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		# self.date_static_txt.Wrap( -1 )
-		# bSizer91.Add( self.date_static_txt, 0, wx.ALL, 5 )
 
 		bSizer92 = wx.BoxSizer( wx.HORIZONTAL )
 
@@ -221,10 +211,8 @@ class NDVI_frame ( wx.Frame ):
 		
 		self.lowright_lon_static_txt = wx.StaticText( sbSizer_metadata.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.lowright_lon_static_txt.Wrap( -1 )
-		bSizer95.Add( self.lowright_lon_static_txt, 0, wx.ALL, 5 )
-			
+		bSizer95.Add( self.lowright_lon_static_txt, 0, wx.ALL, 5 )	
 		
-		# bSizer13.Add( bSizer91, 1, wx.EXPAND, 5 )
 		bSizer13.Add( bSizer92, 1, wx.EXPAND, 5 )
 		bSizer13.Add( bSizer93, 1, wx.EXPAND, 5 )
 		bSizer13.Add( bSizer94, 1, wx.EXPAND, 5 )
@@ -302,7 +290,7 @@ class NDVI_frame ( wx.Frame ):
 		self.crop_btn.Bind( wx.EVT_BUTTON, self.cropCoordinate )
 		self.browse_nir_btn.Bind( wx.EVT_BUTTON, self.browseNIR )
 		self.metadata_btn.Bind( wx.EVT_FILEPICKER_CHANGED, self.browseMetadata )
-		self.ndvi_btn.Bind( wx.EVT_BUTTON, self.startNDVI )
+		self.ndvi_btn.Bind( wx.EVT_BUTTON, self.onStartNDVI )
 		self.save_btn.Bind( wx.EVT_BUTTON, self.saveImage )
 
 		self.ndvi = NDVI()
@@ -314,19 +302,27 @@ class NDVI_frame ( wx.Frame ):
 	
 	# Virtual event handlers, overide them in your derived class
 	def close( self, event ):
-		event.Skip()
-	
+		dialog = wx.MessageDialog(None, "Do you want to exit?",'Exit Program',wx.YES_NO | wx.ICON_QUESTION)
+		result = dialog.ShowModal()
+		
+		if result == wx.ID_YES:
+			self.Close()
+		else:
+			return
+		
 	def about( self, event ):
+		self.ShowMessage("About", "Nama: I Made Yoga Mardia Wara Harmana \nNIM   : 1504505039")
 		event.Skip()
 	
+	#------------------ BROWSE BAND 4, BAND 5, AND METADATA -------------------#
+
 	def browseImage( self, event ):
-		# path = event.GetPath
 		wildcard = "TIFF files (*.tif)|*.tif"
-		dialog = wx.FileDialog(None, "Choose a file",
+		dialog = wx.FileDialog(None, "Choose Band 4 Image",
 								wildcard=wildcard,
 								style=wx.FD_OPEN)
 		if dialog.ShowModal() == wx.ID_CANCEL:
-			return     # the user changed their mind
+			return     
 		
 		path = dialog.GetPath()
 		self.ndvi.OpenB4File(path)
@@ -336,28 +332,10 @@ class NDVI_frame ( wx.Frame ):
 		bitmap = wx.Bitmap(scaledImage)
 		self.img_red_bitmap.SetBitmap(bitmap)
 		event.Skip()
-	
-	def cropCoordinate( self, event ):
-		latStart = self.startlat_txtCtrl.GetValue()
-		latEnd =  self.endlat_txtCtrl	.GetValue()
-		lonStart =  self.startlon_txtCtrl.GetValue()
-		lonEnd = self.endlon_txtCtrl.GetValue()
-
-		self.ndvi.SetCropCoordinate(latStart, latEnd, lonStart, lonEnd)
-		self.ndvi.CropImage()
-		event.Skip()
-	
-	def onCropFinish(self, red, nir):
-		red_image = self.convertToImage(red, False)
-		nir_image = self.convertToImage(nir, False)
-
-		self.img_red_bitmap.SetBitmap(wx.Bitmap(red_image))
-		self.nir_bitmap.SetBitmap(wx.Bitmap(nir_image))
-		frame.Layout()
 
 	def browseNIR( self, event ):
 		wildcard = "TIFF files (*.tif)|*.tif"
-		dialog = wx.FileDialog(None, "Choose a file",
+		dialog = wx.FileDialog(None, "Choose NIR Image",
 								wildcard=wildcard,
 								style=wx.FD_OPEN)
 		if dialog.ShowModal() == wx.ID_CANCEL:
@@ -381,17 +359,90 @@ class NDVI_frame ( wx.Frame ):
 		self.lowright_lat_static_txt.SetLabel(str(self.metadata['CORNER_LR_LAT_PRODUCT']))
 		self.lowright_lon_static_txt.SetLabel(str(self.metadata['CORNER_LR_LON_PRODUCT']))
 		event.Skip()
-	
-	def startNDVI( self, event ):
+
+	#-------------------- CROPPING ----------------------#
+
+	def cropCoordinate( self, event ):
+		latStart = self.startlat_txtCtrl.GetValue()
+		latEnd =  self.endlat_txtCtrl	.GetValue()
+		lonStart =  self.startlon_txtCtrl.GetValue()
+		lonEnd = self.endlon_txtCtrl.GetValue()
+
+		self.ndvi.SetCropCoordinate(latStart, latEnd, lonStart, lonEnd)
+		self.ndvi.CropImage()
 		event.Skip()
 	
+	def onCropFinish(self, red, nir):
+		red_image = self.convertToImage(red, False)
+		nir_image = self.convertToImage(nir, False)
+
+		self.img_red_bitmap.SetBitmap(wx.Bitmap(red_image))
+		self.nir_bitmap.SetBitmap(wx.Bitmap(nir_image))
+		frame.Layout()
+		self.ShowMessage("Info", "Cropping Successful")
+	
+	# ----------------- NDVI PROCESS ------------------ #
+
+	def onStartNDVI( self, event ):
+		self.ndvi.StartNDVI()
+		event.Skip()
+	
+	def onFinishNDVI(self, result):
+		image = self.convertToImage(result, True)
+		self.ndvi_bitmap.SetBitmap(wx.Bitmap(image))
+		("Info", "Cropping Successful .")
+		frame.Layout()
+		self.ShowMessage("Info", "NDVI Successful")
+
+	def convertToImage(self, array, isfloat):
+		if isfloat:
+			rgb = array * 255
+		else:
+			rgb = array / 255
+
+		pilImage = Image.fromarray(rgb).convert('RGB')
+		image = wx.Image(pilImage.size[0], pilImage.size[1])
+		image.SetData(pilImage.tobytes())
+
+		H = image.GetHeight()
+		W = image.GetWidth()
+		newH = 280
+		newW = 280
+		if (W > H):
+			newH = 280 * H / W
+		else:
+			newW = 280 * W / H
+
+		image = image.Scale(newW, newH)
+		return image
+	
+	# ----------------- SAVE IMAGE ----------------- #
+
 	def saveImage( self, event ):
+		saveFileDialog = wx.FileDialog(frame, 'Save to TIF', '', '', 'GeoTiff Files(*tif)|*.tif', wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+
+		if (saveFileDialog.ShowModal() == wx.ID_OK):
+			path = saveFileDialog.GetPath()
+			self.ndvi.SaveResult(path)
+			self.ShowMessage("Info", "File has been saved")
+		else:
+			self.ShowError("Info", "Failed to save file")
+
 		event.Skip()
 	
+	# -------------- MESSAGE ----------------------- #
+
+	def ShowMessage(self, title, message):
+		dialog = wx.MessageDialog(None, message, title, wx.OK | wx.ICON_INFORMATION)
+		dialog.ShowModal()
+
+	def ShowError(self, title, message):
+		dialog = wx.MessageDialog(None, message, title, wx.OK | wx.ICON_ERROR)
+		dialog.ShowModal()
 
 app = wx.App(False)
 
-#create an object of MyFrame2
+#create an object of Frame
 frame = NDVI_frame(None)
 #show the frame
 frame.Show(True)
