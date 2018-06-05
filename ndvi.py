@@ -159,7 +159,7 @@ class NDVI:
         print ("NDVI: \n", self.ndvi, "\n")
 
         if (self.listener != None):
-            self.listener.onNDVIFinish(self.ndvi)
+            self.listener.onFinishNDVI(self.ndvi)
             # self.saveResult()
 
     def setMetaData(self, path):
@@ -186,7 +186,7 @@ class NDVI:
         print ("File created successfully.")
 
 class OnProcessFinishListener:
-    def onNDVIFinish(self, result):
+    def onFinishNDVI(self, result):
         print ("ndvi finished")
 
     def onCropFinish(self, red, nir):
